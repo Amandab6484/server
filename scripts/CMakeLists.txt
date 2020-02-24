@@ -294,6 +294,8 @@ ELSE()
     ${WSREP_SCRIPTS}
     ${SYSTEMD_SCRIPTS}
   )
+  
+  FILE(APPEND "C:\\Users\\rasmu\\mariadb-server\\wbuild\\boo.txt" "msql2mysql_COMPONENT: " ${msql2mysql_COMPONENT} "\n")
 
   FOREACH(file ${BIN_SCRIPTS})
     # set name of executable
@@ -320,18 +322,21 @@ ELSE()
       # macro does an INSTALL(PROGRAMS ..) that automatically sets +x on
       # the executable.
       EXECUTE_PROCESS(COMMAND chmod +x ${CMAKE_CURRENT_BINARY_DIR}/${file})
-      IF(NOT ${file}_COMPONENT)
-        SET(${file}_COMPONENT Server)
+
+      IF(NOT ${binname}_COMPONENT OR ${binname}_COMPONENT STREQUAL "")
+        SET(${binname}_COMPONENT Server)
       ENDIF()
+
       INSTALL_SCRIPT(
-        ${CMAKE_CURRENT_BINARY_DIR}/${file}
+        ${CMAKE_CURRENT_BINARY_DIR}/${binname}
         DESTINATION ${INSTALL_BINDIR}
-        COMPONENT ${${file}_COMPONENT}
+        COMPONENT ${${binname}_COMPONENT}
       )
+
       # Create symlink
       ADD_CUSTOM_COMMAND(OUTPUT ${binname} COMMAND ${CMAKE_COMMAND} ARGS -E create_symlink ${file} ${binname})
       ADD_CUSTOM_TARGET(symscript_${binname} ALL DEPENDS ${binname})
-      INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${binname} DESTINATION ${INSTALL_BINDIR} COMPONENT Server)
+      INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${binname} DESTINATION ${INSTALL_BINDIR} COMPONENT ${${binname}_COMPONENT})
     endif()
   ENDFOREACH()
 
